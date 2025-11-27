@@ -1,0 +1,1925 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
+  <meta name="theme-color" content="var(--tg-theme-bg-color)"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="format-detection" content="telephone=no"/>
+  <meta name="description" content="Paradox Movies - Premium streaming experience"/>
+  <title>Paradox Movies</title>
+  
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    :root {
+      --tg-theme-bg-color: #ffffff;
+      --tg-theme-text-color: #000000;
+      --tg-theme-hint-color: #999999;
+      --tg-theme-link-color: #2481cc;
+      --tg-theme-button-color: #2481cc;
+      --tg-theme-button-text-color: #ffffff;
+      --tg-theme-secondary-bg-color: #f4f4f5;
+      --border-color: rgba(0, 0, 0, 0.08);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      background: var(--tg-theme-bg-color);
+      color: var(--tg-theme-text-color);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+    }
+    
+    .app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 100%;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    .header {
+      background: var(--tg-theme-bg-color);
+      padding: max(env(safe-area-inset-top), 8px) 16px 12px;
+      position: relative;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--tg-theme-button-color);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .logo-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--tg-theme-text-color);
+    }
+    
+    .profile-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      background: var(--tg-theme-secondary-bg-color);
+      cursor: pointer;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    
+    .profile-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .profile-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .search-container {
+      padding: 0 16px 12px;
+      background: var(--tg-theme-bg-color);
+      border-bottom: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+    }
+    
+    .search-container.hidden {
+      display: none;
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 10px 40px 10px 14px;
+      background: var(--tg-theme-secondary-bg-color);
+      border: 2px solid transparent;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--tg-theme-text-color);
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+      border-color: var(--tg-theme-button-color);
+      box-shadow: 0 0 0 3px rgba(36, 129, 204, 0.1);
+    }
+    
+    .search-input::placeholder {
+      color: var(--tg-theme-hint-color);
+    }
+    
+    .search-input::-webkit-search-cancel-button {
+      display: none;
+    }
+    
+    .search-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 6px;
+      cursor: pointer;
+      color: var(--tg-theme-button-color);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+    
+    .search-clear.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 0 env(safe-area-inset-bottom) 0;
+    }
+    
+    .main::-webkit-scrollbar {
+      width: 0;
+    }
+    
+    .content-section {
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .content-section.active {
+      display: block;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .posts-container {
+      padding: 12px 16px;
+      display: grid;
+      gap: 12px;
+    }
+    
+    .post-card {
+      background: var(--tg-theme-bg-color);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+    
+    .post-card:active {
+      transform: scale(0.98);
+    }
+    
+    .post-media {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+      overflow: hidden;
+    }
+    
+    body.dark .post-media {
+      background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+    }
+    
+    .media-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .download-icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .media-placeholder:active .download-icon {
+      transform: scale(0.9);
+    }
+    
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid transparent;
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .post-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    
+    .post-media img.loaded {
+      opacity: 1;
+    }
+    
+    .favorite-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 36px;
+      height: 36px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 2;
+    }
+    
+    .favorite-btn:active {
+      transform: scale(0.9);
+    }
+    
+    .favorite-btn.active {
+      background: rgba(239, 68, 68, 0.9);
+    }
+    
+    .favorite-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: white;
+      stroke-width: 2;
+      transition: all 0.2s ease;
+    }
+    
+    .favorite-btn.active svg {
+      fill: white;
+    }
+    
+    .post-content {
+      padding: 12px;
+    }
+    
+    .post-text {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--tg-theme-text-color);
+      line-height: 1.5;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .post-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .action-btn {
+      padding: 9px 14px;
+      background: var(--tg-theme-button-color);
+      color: var(--tg-theme-button-text-color);
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      text-align: center;
+      display: block;
+      width: 100%;
+    }
+    
+    .action-btn-row {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .action-btn-row .action-btn {
+      flex: 1;
+      width: auto;
+    }
+    
+    .action-btn:active {
+      transform: scale(0.96);
+      opacity: 0.8;
+    }
+    
+    .profile-section {
+      padding: 20px 16px;
+    }
+    
+    .profile-header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 20px 0;
+    }
+    
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      border: 3px solid var(--tg-theme-button-color);
+    }
+    
+    .profile-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .profile-username {
+      font-size: 14px;
+      color: var(--tg-theme-hint-color);
+      margin-bottom: 2px;
+    }
+    
+    .profile-id {
+      font-size: 12px;
+      color: var(--tg-theme-hint-color);
+    }
+    
+    .settings-group {
+      margin-bottom: 20px;
+    }
+    
+    .settings-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--tg-theme-hint-color);
+      margin-bottom: 10px;
+      padding: 0 4px;
+    }
+    
+    .settings-container {
+      background: var(--tg-theme-secondary-bg-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .setting-item {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+    
+    .setting-item:active {
+      opacity: 0.7;
+    }
+    
+    .setting-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      flex: 1;
+    }
+    
+    .setting-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--tg-theme-button-color);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    
+    .setting-value {
+      font-size: 14px;
+      color: var(--tg-theme-hint-color);
+      margin-right: 4px;
+    }
+    
+    .setting-arrow {
+      color: var(--tg-theme-hint-color);
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: var(--border-color);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .toggle-switch.active {
+      background: var(--tg-theme-button-color);
+    }
+    
+    .toggle-switch.active::after {
+      transform: translateX(20px);
+    }
+    
+    .clear-cache-btn {
+      width: 100%;
+      padding: 14px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .clear-cache-btn:active {
+      transform: scale(0.98);
+      opacity: 0.8;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      opacity: 0.3;
+      color: var(--tg-theme-hint-color);
+    }
+    
+    .empty-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    
+    .empty-text {
+      font-size: 14px;
+      color: var(--tg-theme-hint-color);
+    }
+    
+    .skeleton {
+      background: linear-gradient(90deg, var(--tg-theme-secondary-bg-color) 25%, var(--border-color) 50%, var(--tg-theme-secondary-bg-color) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-card {
+      margin-bottom: 12px;
+    }
+    
+    .skeleton-media {
+      width: 100%;
+      height: 180px;
+      margin-bottom: 10px;
+    }
+    
+    .skeleton-text {
+      height: 16px;
+      margin-bottom: 8px;
+    }
+    
+    .load-more {
+      padding: 16px;
+      text-align: center;
+    }
+    
+    .load-more-spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--tg-theme-button-color);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      transform: translateY(100%);
+      background: #10b981;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.15);
+      z-index: 10000;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 56px;
+    }
+    
+    .toast.show {
+      transform: translateY(0);
+    }
+    
+    .toast.success {
+      background: #10b981;
+    }
+    
+    .toast.error {
+      background: #ef4444;
+    }
+    
+    .toast.info {
+      background: var(--tg-theme-button-color);
+    }
+    
+    .toast-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .toast-text {
+      font-size: 15px;
+      font-weight: 500;
+      color: white;
+      flex: 1;
+      text-align: center;
+    }
+    
+    .fab {
+      position: fixed;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      right: 16px;
+      width: 48px;
+      height: 48px;
+      background: var(--tg-theme-button-color);
+      border: none;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+    
+    .fab.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .fab:active {
+      transform: scale(0.9);
+    }
+    
+    .ptr {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .ptr.active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .ptr-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(36, 129, 204, 0.3);
+      border-top-color: var(--tg-theme-button-color);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toast" id="toast">
+    <div class="toast-icon" id="toastIcon"></div>
+    <div class="toast-text" id="toastText"></div>
+  </div>
+
+  <div class="ptr" id="ptr">
+    <div class="ptr-spinner"></div>
+  </div>
+
+  <div class="app" id="app">
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"/>
+              <path d="m6.2 5.3 3.1 3.9"/>
+              <path d="m12.4 3.4 3.1 4"/>
+              <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>
+            </svg>
+          </div>
+          <div class="logo-text" id="headerTitle">Paradox Movies</div>
+        </div>
+        
+        <button class="profile-btn" id="profileBtn">
+          <img id="profileBtnImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%232481cc' width='100' height='100'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40' font-family='sans-serif'%3EU%3C/text%3E%3C/svg%3E" alt="Profile">
+        </button>
+      </div>
+    </header>
+
+    <div class="search-container" id="searchContainer">
+      <div class="search-box">
+        <input 
+          type="text" 
+          class="search-input" 
+          id="searchInput"
+          placeholder="Search movies..."
+          autocomplete="off"
+        />
+        <button class="search-clear" id="searchClear">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <main class="main" id="mainContent">
+      <section class="content-section active" id="browseSection">
+        <div class="posts-container" id="postsContainer"></div>
+        <div class="load-more" id="loadMore" style="display:none;">
+          <div class="load-more-spinner"></div>
+        </div>
+      </section>
+
+      <section class="content-section" id="favoritesSection">
+        <div class="posts-container" id="favoritesContainer"></div>
+      </section>
+
+      <section class="content-section" id="profileSection">
+        <div class="profile-section">
+          <div class="profile-header">
+            <img class="profile-avatar" id="profileAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%232481cc' width='100' height='100'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.3em' fill='white' font-size='40' font-family='sans-serif'%3EU%3C/text%3E%3C/svg%3E" alt="Profile">
+            <div class="profile-name" id="profileName">User</div>
+            <div class="profile-username" id="profileUsername">@username</div>
+            <div class="profile-id" id="profileId">ID: 000000</div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-title">Preferences</div>
+            <div class="settings-container">
+              <div class="setting-item" id="hapticToggleItem">
+                <div class="setting-label">
+                  <div class="setting-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" style="width:80%;height:80%;transform:translate3d(0,0,0)"><defs><clipPath id="a"><path d="M0 0h512v512H0z"/></clipPath><clipPath id="b"><path d="M0 0h101v100H0z"/></clipPath></defs><g clip-path="url(#a)"><g clip-path="url(#b)" style="display:block" transform="translate(0 2.535)scale(5.0693)"><path stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="6" d="M18.235 60.519h6.5l5.433-12.476c.395-.907 1.726-.751 1.901.222l4.883 27.138c.2 1.106 1.79 1.093 1.971-.017l8.19-50.258c.178-1.096 1.742-1.128 1.966-.041l8.932 43.445c.219 1.063 1.738 1.065 1.959.002l6.202-29.83c.203-.975 1.551-1.087 1.912-.158l8.526 21.973h5.625" fill="none" style="display:block"/></g></g></svg>
+                  </div>
+                  <span>Haptic Feedback</span>
+                </div>
+                <div class="toggle-switch active" id="hapticToggle"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-title">Storage</div>
+            <button class="clear-cache-btn" id="clearCache">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              Clear Cache
+            </button>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-title">About</div>
+            <div class="settings-container">
+              <div class="setting-item">
+                <div class="setting-label">
+                  <div class="setting-icon">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" style="width:80%;height:80%;transform:translate3d(0,0,0)"><defs><clipPath id="a"><path d="M0 0h512v512H0z"/></clipPath><clipPath id="b"><path d="M0 0h100v100H0z"/></clipPath></defs><g clip-path="url(#a)"><g clip-path="url(#b)" style="display:block" transform="scale(5.12)"><path fill="#fff" d="m24 35.28 11.67-11.66a2.63 2.63 0 0 1 3.71 0l11.67 11.66c.83.83.24 2.25-.93 2.25h-6.03c-.73 0-1.31.58-1.31 1.31v10.51c0 .72-.59 1.31-1.31 1.31h-7.88c-.73 0-1.32-.59-1.32-1.31V38.84c0-.73-.58-1.31-1.31-1.31h-6.03c-1.17 0-1.76-1.42-.93-2.25M37.53 63.8c14.51 0 26.27-11.76 26.27-26.27S52.04 11.25 37.53 11.25 11.25 23.02 11.25 37.53 23.02 63.8 37.53 63.8" transform="scale(1.3333)" style="display:block"/></g></g></svg>
+                  </div>
+                  <span>App Version</span>
+                </div>
+                <div class="setting-value">v1.0.3</div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-label">
+                  <div class="setting-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                  </div>
+                  <span>Developer</span>
+                </div>
+                <div class="setting-value">@Paradox0x0</div>
+              </div>
+              <div class="setting-item" id="joinChannelItem">
+                <div class="setting-label">
+                  <div class="setting-icon">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" width="512" height="512" style="width: 80%; height: 80%; transform: translate3d(0,0,0);" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <clipPath id="__lottie_element_2">
+      <rect width="512" height="512" x="0" y="0"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#__lottie_element_2)">
+    <g style="display: block;" transform="matrix(1.333299994468689,0,0,1.333299994468689,0,0)" opacity="1">
+      <g opacity="1" transform="matrix(1,0,0,1,0,0)">
+        <g opacity="1" transform="matrix(1,0,0,1,0,0)">
+          <path fill="rgb(255,255,255)" fill-opacity="1" d=" M77.16000366210938,177.49000549316406 C144.91000366210938,148.02999877929688 190.0800018310547,128.61000061035156 212.69000244140625,119.22000122070312 C277.2300109863281,92.43000030517578 290.6400146484375,87.77999877929688 299.3800048828125,87.62000274658203 C301.29998779296875,87.58999633789062 305.6000061035156,88.06999969482422 308.3800048828125,90.31999969482422 C310.7300109863281,92.2300033569336 311.3800048828125,94.80000305175781 311.69000244140625,96.5999984741211 C312,98.4000015258789 312.3800048828125,102.5199966430664 312.0799865722656,105.7300033569336 C308.5799865722656,142.41000366210938 293.45001220703125,231.4199981689453 285.75,272.5 C282.489990234375,289.8800048828125 276.0799865722656,295.7099914550781 269.8699951171875,296.2799987792969 C256.3699951171875,297.5199890136719 246.1199951171875,287.3699951171875 233.0500030517578,278.82000732421875 C212.60000610351562,265.44000244140625 201.0399932861328,257.1099853515625 181.19000244140625,244.0500030517578 C158.24000549316406,228.9600067138672 173.1199951171875,220.66000366210938 186.1999969482422,207.11000061035156 C189.6199951171875,203.55999755859375 249.0800018310547,149.57000732421875 250.22999572753906,144.67999267578125 C250.3699951171875,144.07000732421875 250.50999450683594,141.7899932861328 249.14999389648438,140.5800018310547 C247.7899932861328,139.3699951171875 245.7899932861328,139.7899932861328 244.33999633789062,140.1199951171875 C242.2899932861328,140.5800018310547 209.61000061035156,162.13999938964844 146.30999755859375,204.7899932861328 C137.02999877929688,211.14999389648438 128.63999938964844,214.22999572753906 121.11000061035156,214.07000732421875 C112.80999755859375,213.88999938964844 96.8499984741211,209.38999938964844 84.9800033569336,205.5399932861328 C70.43000030517578,200.82000732421875 58.869998931884766,198.32000732421875 59.869998931884766,190.3000030517578 C60.400001525878906,186.1199951171875 66.16000366210938,181.85000610351562 77.16000366210938,177.49000549316406 C77.16000366210938,177.49000549316406 77.16000366210938,177.49000549316406 77.16000366210938,177.49000549316406z"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
+                  </div>
+                  <span>Join Telegram Channel</span>
+                </div>
+                <div class="setting-arrow">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-title">Support</div>
+            <div class="settings-container">
+              <div class="setting-item" id="contactSupportItem">
+                <div class="setting-label">
+                  <div class="setting-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" style="width:80%;height:80%;transform:translate3d(0,0,0)"><defs><clipPath id="a"><path d="M0 0h512v512H0z"/></clipPath><clipPath id="b"><path d="M0 0h100v100H0z"/></clipPath></defs><g clip-path="url(#a)"><g clip-path="url(#b)" style="display:block" transform="scale(5.12)"><path fill="#fff" d="M40.646 17.928c16.237 0 29.399 11.966 29.399 26.727 0 14.76-13.163 26.726-29.4 26.726-2.489 0-4.906-.281-7.214-.81-.965-.222-2.218 2.281-6.702 4.796-3.136 1.758-7.48 1.606-8.215 1.297-1.193-.5 1.185-1.836 3.093-4.76s1.119-6.405.263-7.031c-6.691-4.9-10.624-11.8-10.624-20.218 0-14.761 13.163-26.727 29.4-26.727m28.158 9.429c11.6 3.577 19.95 13.56 19.95 25.316 0 8.418-3.933 15.319-10.624 20.218-.856.626-1.644 4.107.263 7.031s4.286 4.26 3.093 4.76c-.735.309-5.08.461-8.215-1.297-4.484-2.515-5.737-5.018-6.702-4.797a32.2 32.2 0 0 1-7.215.811c-5.5 0-10.647-1.373-15.05-3.763 16.898-1.675 30.178-14.822 30.178-30.981 0-6.418-2.095-12.36-5.678-17.298" style="display:block"/></g></g></svg>
+                  </div>
+                  <span>Contact Support</span>
+                </div>
+                <div class="setting-arrow">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-title">Legal</div>
+            <div class="settings-container">
+              <div class="setting-item" id="privacyPolicyItem">
+                <div class="setting-label">
+                  <div class="setting-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hat-glasses-icon lucide-hat-glasses"><path d="M14 18a2 2 0 0 0-4 0"/><path d="m19 11-2.11-6.657a2 2 0 0 0-2.752-1.148l-1.276.61A2 2 0 0 1 12 4H8.5a2 2 0 0 0-1.925 1.456L5 11"/><path d="M2 11h20"/><circle cx="17" cy="18" r="3"/><circle cx="7" cy="18" r="3"/></svg>
+                  </div>
+                  <span>Privacy Policy</span>
+                </div>
+                <div class="setting-arrow">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="setting-item" id="copyrightNoticeItem">
+                <div class="setting-label">
+                  <div class="setting-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M15 9.354a4 4 0 1 0 0 5.292"/>
+                    </svg>
+                  </div>
+                  <span>Copyright Notice</span>
+                </div>
+                <div class="setting-arrow">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <button class="fab" id="fab">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <path d="M12 19V5M5 12l7-7 7 7"/>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    window.SYNC_POSTS_URL = "<% options.syncPostsUrl %>";
+window.BOT_NAME = "<% options.botName %>";
+window.TELEGRAM_CHANNEL = "<% options.telegramChannel %>";
+window.SUPPORT_BOT = "<% options.supportBot %>";
+window.PRIVACY_POLICY_URL = "<% options.privacyPolicyUrl %>";
+window.COPYRIGHT_NOTICE_URL = "<% options.copyrightNoticeUrl %>";
+  </script>
+
+  <script>
+    (function() {
+      'use strict';
+
+      const SYNC_URL = window.SYNC_POSTS_URL;
+      const BOT_NAME = window.BOT_NAME;
+      const TELEGRAM_CHANNEL = window.TELEGRAM_CHANNEL || '@ParadoxMovies';
+      const SUPPORT_BOT = window.SUPPORT_BOT || '@ParadoxSupportBot';
+      const PRIVACY_POLICY_URL = window.PRIVACY_POLICY_URL || 'https://telegra.ph/Privacy-Policy-01-01';
+      const COPYRIGHT_NOTICE_URL = window.COPYRIGHT_NOTICE_URL || 'https://telegra.ph/Copyright-Notice-01-01';
+      
+      const tg = window.Telegram?.WebApp;
+      const CACHE_KEY = 'paradox_image_cache';
+      const POSTS_CACHE_KEY = 'paradox_posts_cache';
+      
+      if (tg) {
+        tg.ready();
+        tg.expand();
+        tg.disableVerticalSwipes();
+        tg.enableClosingConfirmation();
+        
+        if (tg.themeParams) {
+          document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
+          document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
+          document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#999999');
+          document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color || '#2481cc');
+          document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#2481cc');
+          document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
+          document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color || '#f4f4f5');
+          
+          if (tg.colorScheme === 'dark') {
+            document.body.classList.add('dark');
+          }
+        }
+      }
+
+      const state = {
+        currentTab: 'browse',
+        posts: [],
+        postsById: new Map(),
+        favorites: new Set(JSON.parse(localStorage.getItem('favorites') || '[]')),
+        imageCache: new Map(),
+        offset: 0,
+        limit: 10,
+        loading: false,
+        hasMore: true,
+        searchQuery: '',
+        settings: {
+          haptic: localStorage.getItem('haptic') !== 'false'
+        },
+        inProfile: false,
+        previousTab: 'browse'
+      };
+
+      function hasFavorites() {
+        return state.favorites.size > 0;
+      }
+
+      function updateTelegramButtons() {
+        if (!tg) return;
+
+        tg.MainButton.hide();
+        tg.SecondaryButton.hide();
+
+        if (state.inProfile) {
+          return;
+        }
+
+        if (state.currentTab === 'browse') {
+          if (hasFavorites()) {
+            tg.SecondaryButton.setText('Favorites');
+            tg.SecondaryButton.setParams({
+              color: tg.themeParams.bottom_bar_bg_color || tg.themeParams.secondary_bg_color,
+              text_color: tg.themeParams.button_color,
+              is_active: true,
+              is_visible: true,
+              has_shine_effect: true
+            });
+            tg.SecondaryButton.show();
+          }
+        } else if (state.currentTab === 'favorites') {
+          tg.MainButton.setText('Home');
+          tg.MainButton.setParams({
+            color: tg.themeParams.button_color,
+            text_color: tg.themeParams.button_text_color,
+            is_active: true,
+            is_visible: true,
+            has_shine_effect: true
+          });
+          tg.MainButton.show();
+        }
+      }
+
+      function initTelegramButtons() {
+        if (!tg) return;
+
+        tg.SettingsButton.show();
+        
+        tg.MainButton.onClick(() => {
+          haptic('light');
+          if (state.currentTab === 'favorites') {
+            navigateToTab('browse');
+          }
+        });
+
+        tg.SecondaryButton.onClick(() => {
+          haptic('light');
+          if (state.currentTab === 'browse' && hasFavorites()) {
+            navigateToTab('favorites');
+          }
+        });
+
+        tg.SettingsButton.onClick(() => {
+          haptic('medium');
+          openSettings();
+        });
+
+        updateTelegramButtons();
+      }
+
+      function loadImageCache() {
+        try {
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (cached) {
+            const data = JSON.parse(cached);
+            Object.entries(data).forEach(([url, isLoaded]) => {
+              if (isLoaded) {
+                state.imageCache.set(url, { loaded: true });
+              }
+            });
+          }
+        } catch (e) {
+          console.warn('Failed to load image cache:', e);
+        }
+      }
+
+      function saveImageCache() {
+        try {
+          const cacheData = {};
+          state.imageCache.forEach((value, key) => {
+            if (value.loaded) {
+              cacheData[key] = true;
+            }
+          });
+          localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+        } catch (e) {
+          console.warn('Failed to save image cache:', e);
+        }
+      }
+
+      function savePostsCache() {
+        try {
+          const postsArray = Array.from(state.postsById.values());
+          localStorage.setItem(POSTS_CACHE_KEY, JSON.stringify(postsArray));
+        } catch (e) {
+          console.warn('Failed to save posts cache:', e);
+        }
+      }
+
+      function loadPostsCache() {
+        try {
+          const cached = localStorage.getItem(POSTS_CACHE_KEY);
+          if (cached) {
+            const postsArray = JSON.parse(cached);
+            postsArray.forEach(post => {
+              state.postsById.set(post.id, post);
+            });
+          }
+        } catch (e) {
+          console.warn('Failed to load posts cache:', e);
+        }
+      }
+
+      function haptic(type = 'medium') {
+        if (!state.settings.haptic) return;
+        
+        try {
+          if (tg?.HapticFeedback) {
+            if (type === 'success') {
+              tg.HapticFeedback.notificationOccurred('success');
+            } else if (type === 'error') {
+              tg.HapticFeedback.notificationOccurred('error');
+            } else if (type === 'warning') {
+              tg.HapticFeedback.notificationOccurred('warning');
+            } else if (type === 'selection') {
+              tg.HapticFeedback.selectionChanged();
+            } else {
+              tg.HapticFeedback.impactOccurred(type);
+            }
+          } else if (navigator.vibrate) {
+            const patterns = {
+              light: 20,
+              medium: 50,
+              heavy: 100,
+              rigid: 30,
+              soft: 40,
+              success: [50, 30, 50],
+              error: [100],
+              warning: [30, 50, 30],
+              selection: 10
+            };
+            navigator.vibrate(patterns[type] || 50);
+          }
+        } catch (e) {
+          console.warn('Haptic feedback error:', e);
+        }
+      }
+
+      function setupBackButton() {
+        if (!tg?.BackButton) return;
+        
+        const backButton = tg.BackButton;
+        
+        backButton.onClick(() => {
+          haptic('light');
+          if (state.inProfile) {
+            navigateToTab(state.previousTab);
+            backButton.hide();
+            state.inProfile = false;
+            updateTelegramButtons();
+          } else if (state.currentTab === 'favorites') {
+            navigateToTab('browse');
+          }
+        });
+
+        if (state.currentTab === 'favorites') {
+          backButton.show();
+        }
+      }
+
+      function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        const toastIcon = document.getElementById('toastIcon');
+        const toastText = document.getElementById('toastText');
+
+        toast.className = `toast ${type}`;
+        
+        const icons = {
+          success: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+          error: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+          info: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+        };
+
+        toastIcon.innerHTML = icons[type] || icons.info;
+        toastText.textContent = message;
+
+        toast.classList.add('show');
+        haptic(type);
+        
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      }
+
+      async function fetchPosts(query = '', offset = 0, limit = 10) {
+        try {
+          const response = await fetch(SYNC_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ q: query, offset, limit })
+          });
+
+          if (!response.ok) throw new Error('Network error');
+
+          const data = await response.json();
+          return { success: true, posts: data.posts || [] };
+        } catch (error) {
+          console.error('Fetch error:', error);
+          return { success: false, posts: [] };
+        }
+      }
+
+      function escapeHtml(text) {
+        const map = {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        };
+        return text ? text.replace(/[&<>"']/g, m => map[m]) : '';
+      }
+
+      function createButtonsHTML(buttons) {
+        if (!buttons || !buttons.length) return '';
+
+        let html = '<div class="post-actions">';
+        
+        const allButtons = buttons.flat();
+        const totalButtons = allButtons.length;
+
+        if (totalButtons === 0) return '';
+
+        if (totalButtons === 1) {
+          html += `
+            <a href="${allButtons[0].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+              ${allButtons[0].text || 'Open'}
+            </a>
+          `;
+        } else if (totalButtons === 2) {
+          html += '<div class="action-btn-row">';
+          allButtons.forEach(btn => {
+            html += `
+              <a href="${btn.url || '#'}" class="action-btn" target="_blank" rel="noopener">
+                ${btn.text || 'Open'}
+              </a>
+            `;
+          });
+          html += '</div>';
+        } else if (totalButtons === 3) {
+          html += `
+            <a href="${allButtons[0].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+              ${allButtons[0].text || 'Open'}
+            </a>
+          `;
+          html += '<div class="action-btn-row">';
+          for (let i = 1; i < 3; i++) {
+            html += `
+              <a href="${allButtons[i].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+                ${allButtons[i].text || 'Open'}
+              </a>
+            `;
+          }
+          html += '</div>';
+        } else if (totalButtons === 4) {
+          html += `
+            <a href="${allButtons[0].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+              ${allButtons[0].text || 'Open'}
+            </a>
+          `;
+          html += '<div class="action-btn-row">';
+          for (let i = 1; i < 3; i++) {
+            html += `
+              <a href="${allButtons[i].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+                ${allButtons[i].text || 'Open'}
+              </a>
+            `;
+          }
+          html += '</div>';
+          html += `
+            <a href="${allButtons[3].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+              ${allButtons[3].text || 'Open'}
+            </a>
+          `;
+        } else if (totalButtons === 5) {
+          html += `
+            <a href="${allButtons[0].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+              ${allButtons[0].text || 'Open'}
+            </a>
+          `;
+          html += '<div class="action-btn-row">';
+          for (let i = 1; i < 3; i++) {
+            html += `
+              <a href="${allButtons[i].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+                ${allButtons[i].text || 'Open'}
+              </a>
+            `;
+          }
+          html += '</div>';
+          html += '<div class="action-btn-row">';
+          for (let i = 3; i < 5; i++) {
+            html += `
+              <a href="${allButtons[i].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+                ${allButtons[i].text || 'Open'}
+              </a>
+            `;
+          }
+          html += '</div>';
+        } else if (totalButtons >= 6) {
+          for (let i = 0; i < totalButtons; i += 2) {
+            if (i + 1 < totalButtons) {
+              html += '<div class="action-btn-row">';
+              html += `
+                <a href="${allButtons[i].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+                  ${allButtons[i].text || 'Open'}
+                </a>
+              `;
+              html += `
+                <a href="${allButtons[i + 1].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+                  ${allButtons[i + 1].text || 'Open'}
+                </a>
+              `;
+              html += '</div>';
+            } else {
+              html += `
+                <a href="${allButtons[i].url || '#'}" class="action-btn" target="_blank" rel="noopener">
+                  ${allButtons[i].text || 'Open'}
+                </a>
+              `;
+            }
+          }
+        }
+        
+        html += '</div>';
+        return html;
+      }
+
+      function createPostCard(post, isFavorite = false) {
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        card.dataset.postId = post.id;
+
+        const cachedImage = state.imageCache.get(post.photo);
+        const hasCachedImage = cachedImage && cachedImage.loaded;
+
+        const mediaHTML = post.photo ? `
+          <div class="post-media">
+            ${hasCachedImage ? `
+              <img src="${post.photo}" class="loaded" alt="Post image">
+            ` : `
+              <div class="media-placeholder" data-src="${post.photo}">
+                <div class="download-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </div>
+              </div>
+            `}
+            <button class="favorite-btn ${state.favorites.has(post.id) ? 'active' : ''}" data-post-id="${post.id}">
+              <svg viewBox="0 0 24 24">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </button>
+          </div>
+        ` : '';
+
+        const buttonsHTML = createButtonsHTML(post.buttons);
+
+        card.innerHTML = `
+          ${mediaHTML}
+          <div class="post-content">
+            ${post.text ? `<div class="post-text">${escapeHtml(post.text)}</div>` : ''}
+            ${buttonsHTML}
+          </div>
+        `;
+
+        if (post.photo && !hasCachedImage) {
+          const placeholder = card.querySelector('.media-placeholder');
+          if (placeholder) {
+            placeholder.addEventListener('click', () => {
+              haptic('light');
+              loadImage(placeholder, post.photo);
+            });
+          }
+        }
+
+        const favBtn = card.querySelector('.favorite-btn');
+        if (favBtn) {
+          favBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            haptic('light');
+            toggleFavorite(post.id, favBtn, isFavorite);
+          });
+        }
+
+        const actionBtns = card.querySelectorAll('.action-btn');
+        actionBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            haptic('medium');
+          });
+        });
+
+        return card;
+      }
+
+      function loadImage(placeholder, src) {
+        if (state.imageCache.has(src) && state.imageCache.get(src).loaded) {
+          return;
+        }
+        
+        const downloadIcon = placeholder.querySelector('.download-icon');
+        downloadIcon.innerHTML = '<div class="loading-spinner"></div>';
+        
+        const img = new Image();
+        img.src = src;
+        
+        img.onload = () => {
+          const mediaContainer = placeholder.parentElement;
+          img.className = 'loaded';
+          placeholder.remove();
+          mediaContainer.insertBefore(img, mediaContainer.firstChild);
+          
+          state.imageCache.set(src, { loaded: true, element: img });
+          saveImageCache();
+          haptic('success');
+        };
+
+        img.onerror = () => {
+          downloadIcon.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          `;
+          showToast('Failed to load image', 'error');
+        };
+      }
+
+      function toggleFavorite(postId, btn, fromFavorites = false) {
+        if (state.favorites.has(postId)) {
+          state.favorites.delete(postId);
+          btn.classList.remove('active');
+          showToast('Removed from favorites', 'info');
+          haptic('success');
+
+          if (fromFavorites) {
+            const card = btn.closest('.post-card');
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+              card.remove();
+              if (!hasFavorites()) {
+                navigateToTab('browse');
+                showToast('No favorites left', 'info');
+              }
+            }, 300);
+          }
+        } else {
+          state.favorites.add(postId);
+          btn.classList.add('active');
+          showToast('Added to favorites', 'success');
+          haptic('success');
+        }
+
+        localStorage.setItem('favorites', JSON.stringify([...state.favorites]));
+        
+        document.querySelectorAll(`[data-post-id="${postId}"]`).forEach(card => {
+          const favBtn = card.querySelector('.favorite-btn');
+          if (favBtn) {
+            if (state.favorites.has(postId)) {
+              favBtn.classList.add('active');
+            } else {
+              favBtn.classList.remove('active');
+            }
+          }
+        });
+
+        updateTelegramButtons();
+      }
+
+      async function renderPosts(append = false) {
+        const container = document.getElementById('postsContainer');
+        
+        if (!append) {
+          container.innerHTML = '';
+          state.offset = 0;
+          state.hasMore = true;
+          showSkeletons(container, 3);
+        }
+
+        if (state.loading || !state.hasMore) return;
+
+        state.loading = true;
+        document.getElementById('loadMore').style.display = 'block';
+
+        const result = await fetchPosts(state.searchQuery, state.offset, state.limit);
+
+        if (!result.success) {
+          showToast('Failed to load posts', 'error');
+          state.loading = false;
+          document.getElementById('loadMore').style.display = 'none';
+          return;
+        }
+
+        const posts = result.posts;
+
+        if (!append) {
+          container.innerHTML = '';
+        }
+
+        if (posts.length === 0 && !append) {
+          renderEmptyState('postsContainer', 'No posts found', 'Try a different search query');
+          state.loading = false;
+          document.getElementById('loadMore').style.display = 'none';
+          return;
+        }
+
+        posts.forEach(post => {
+          state.postsById.set(post.id, post);
+          container.appendChild(createPostCard(post));
+        });
+
+        state.posts = append ? [...state.posts, ...posts] : posts;
+        state.offset += posts.length;
+        state.hasMore = posts.length === state.limit;
+        state.loading = false;
+        document.getElementById('loadMore').style.display = 'none';
+        
+        savePostsCache();
+      }
+
+      async function renderFavorites() {
+        const container = document.getElementById('favoritesContainer');
+        container.innerHTML = '';
+
+        if (state.favorites.size === 0) {
+          renderEmptyState('favoritesContainer', 'No favorites yet', 'Add some posts to your favorites');
+          return;
+        }
+
+        showSkeletons(container, Math.min(3, state.favorites.size));
+
+        const favoritePosts = [];
+        
+        for (const favId of state.favorites) {
+          if (state.postsById.has(favId)) {
+            favoritePosts.push(state.postsById.get(favId));
+          }
+        }
+
+        if (favoritePosts.length < state.favorites.size) {
+          const result = await fetchPosts('', 0, 200);
+          
+          if (result.success) {
+            result.posts.forEach(post => {
+              state.postsById.set(post.id, post);
+              if (state.favorites.has(post.id) && !favoritePosts.find(p => p.id === post.id)) {
+                favoritePosts.push(post);
+              }
+            });
+            savePostsCache();
+          }
+        }
+
+        container.innerHTML = '';
+
+        if (favoritePosts.length === 0) {
+          renderEmptyState('favoritesContainer', 'No favorites found', 'Your favorite posts will appear here');
+          return;
+        }
+
+        favoritePosts.forEach(post => {
+          container.appendChild(createPostCard(post, true));
+        });
+      }
+
+      function showSkeletons(container, count = 3) {
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+          const skeleton = document.createElement('div');
+          skeleton.className = 'skeleton-card';
+          skeleton.innerHTML = `
+            <div class="skeleton skeleton-media"></div>
+            <div style="padding: 12px;">
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text" style="width: 70%;"></div>
+            </div>
+          `;
+          container.appendChild(skeleton);
+        }
+      }
+
+      function renderEmptyState(containerId, title, text) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="m15 9-6 6"/>
+              <path d="m9 9 6 6"/>
+            </svg>
+            <div class="empty-title">${title}</div>
+            <div class="empty-text">${text}</div>
+          </div>
+        `;
+      }
+
+      function navigateToTab(tabName) {
+        haptic('light');
+        
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(`${tabName}Section`).classList.add('active');
+
+        document.getElementById('headerTitle').textContent = 
+          tabName === 'browse' ? 'Paradox Movies' : 'Favorites';
+
+        const searchContainer = document.getElementById('searchContainer');
+        if (tabName === 'browse') {
+          searchContainer.classList.remove('hidden');
+        } else {
+          searchContainer.classList.add('hidden');
+        }
+
+        document.getElementById('mainContent').scrollTop = 0;
+        state.currentTab = tabName;
+        state.inProfile = false;
+
+        if (tg?.BackButton) {
+          if (tabName === 'favorites') {
+            tg.BackButton.show();
+          } else {
+            tg.BackButton.hide();
+          }
+        }
+
+        updateTelegramButtons();
+
+        if (tabName === 'favorites') {
+          renderFavorites();
+        }
+      }
+
+      function openSettings() {
+        haptic('medium');
+        
+        document.getElementById('searchContainer').classList.add('hidden');
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.getElementById('profileSection').classList.add('active');
+        document.getElementById('mainContent').scrollTop = 0;
+        
+        if (!state.inProfile) {
+          state.previousTab = state.currentTab;
+        }
+        state.inProfile = true;
+        
+        if (tg?.BackButton) {
+          tg.BackButton.show();
+        }
+        
+        updateTelegramButtons();
+        loadProfile();
+      }
+
+      document.getElementById('profileBtn').addEventListener('click', () => {
+        openSettings();
+      });
+
+      const searchInput = document.getElementById('searchInput');
+      const searchClear = document.getElementById('searchClear');
+
+      let searchTimeout;
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        
+        if (query) {
+          searchClear.classList.add('show');
+        } else {
+          searchClear.classList.remove('show');
+        }
+
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          state.searchQuery = query;
+          renderPosts(false);
+        }, 500);
+      });
+
+      searchClear.addEventListener('click', () => {
+        haptic('light');
+        searchInput.value = '';
+        searchClear.classList.remove('show');
+        state.searchQuery = '';
+        searchInput.focus();
+        renderPosts(false);
+      });
+
+      const mainContent = document.getElementById('mainContent');
+      mainContent.addEventListener('scroll', () => {
+        const scrollTop = mainContent.scrollTop;
+        const scrollHeight = mainContent.scrollHeight;
+        const clientHeight = mainContent.clientHeight;
+
+        const fab = document.getElementById('fab');
+        if (scrollTop > 400) {
+          fab.classList.add('show');
+        } else {
+          fab.classList.remove('show');
+        }
+
+        if (state.currentTab === 'browse' && scrollHeight - scrollTop - clientHeight < 300) {
+          renderPosts(true);
+        }
+      });
+
+      document.getElementById('fab').addEventListener('click', () => {
+        haptic('medium');
+        mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      function loadProfile() {
+        const user = tg?.initDataUnsafe?.user;
+        
+        if (user) {
+          const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'User';
+          const username = user.username ? `@${user.username}` : '';
+          const userId = `ID: ${user.id}`;
+          
+          document.getElementById('profileName').textContent = name;
+          document.getElementById('profileUsername').textContent = username || userId;
+          document.getElementById('profileId').textContent = username ? userId : '';
+
+          if (user.photo_url) {
+            document.getElementById('profileAvatar').src = user.photo_url;
+            document.getElementById('profileBtnImg').src = user.photo_url;
+          }
+        }
+      }
+
+      const hapticToggle = document.getElementById('hapticToggle');
+      const hapticToggleItem = document.getElementById('hapticToggleItem');
+
+      hapticToggleItem.addEventListener('click', () => {
+        haptic('light');
+        const isActive = hapticToggle.classList.contains('active');
+        
+        if (isActive) {
+          hapticToggle.classList.remove('active');
+          state.settings.haptic = false;
+        } else {
+          hapticToggle.classList.add('active');
+          state.settings.haptic = true;
+          haptic('success');
+        }
+
+        localStorage.setItem('haptic', state.settings.haptic);
+      });
+
+      document.getElementById('clearCache').addEventListener('click', () => {
+        haptic('medium');
+        
+        state.imageCache.clear();
+        localStorage.removeItem(CACHE_KEY);
+        
+        document.querySelectorAll('.post-media img').forEach(img => {
+          const media = img.parentElement;
+          const src = img.src;
+          const favBtn = media.querySelector('.favorite-btn');
+          
+          img.remove();
+          
+          const placeholder = document.createElement('div');
+          placeholder.className = 'media-placeholder';
+          placeholder.dataset.src = src;
+          placeholder.innerHTML = `
+            <div class="download-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </div>
+          `;
+          
+          placeholder.addEventListener('click', () => {
+            haptic('light');
+            loadImage(placeholder, src);
+          });
+          
+          media.insertBefore(placeholder, favBtn);
+        });
+
+        showToast('Cache cleared successfully', 'success');
+      });
+
+      document.getElementById('joinChannelItem').addEventListener('click', () => {
+        haptic('medium');
+        if (tg) {
+          tg.openTelegramLink(`https://t.me/${TELEGRAM_CHANNEL.replace('@', '')}`);
+        } else {
+          window.open(`https://t.me/${TELEGRAM_CHANNEL.replace('@', '')}`, '_blank');
+        }
+      });
+
+      document.getElementById('contactSupportItem').addEventListener('click', () => {
+        haptic('medium');
+        if (tg) {
+          tg.openTelegramLink(`https://t.me/${SUPPORT_BOT.replace('@', '')}`);
+        } else {
+          window.open(`https://t.me/${SUPPORT_BOT.replace('@', '')}`, '_blank');
+        }
+      });
+
+      document.getElementById('privacyPolicyItem').addEventListener('click', () => {
+        haptic('medium');
+        if (tg) {
+          tg.openLink(PRIVACY_POLICY_URL, { try_instant_view: true });
+        } else {
+          window.open(PRIVACY_POLICY_URL, '_blank');
+        }
+      });
+
+      document.getElementById('copyrightNoticeItem').addEventListener('click', () => {
+        haptic('medium');
+        if (tg) {
+          tg.openLink(COPYRIGHT_NOTICE_URL, { try_instant_view: true });
+        } else {
+          window.open(COPYRIGHT_NOTICE_URL, '_blank');
+        }
+      });
+
+      let startY = 0;
+      let pulling = false;
+      let pullDistance = 0;
+
+      mainContent.addEventListener('touchstart', (e) => {
+        if (mainContent.scrollTop === 0 && state.currentTab === 'browse' && !state.inProfile) {
+          startY = e.touches[0].clientY;
+          pulling = true;
+        }
+      }, { passive: true });
+
+      mainContent.addEventListener('touchmove', (e) => {
+        if (!pulling) return;
+        
+        const currentY = e.touches[0].clientY;
+        pullDistance = currentY - startY;
+
+        if (pullDistance > 0 && mainContent.scrollTop === 0) {
+          if (pullDistance > 80) {
+            document.getElementById('ptr').classList.add('active');
+          }
+        }
+      }, { passive: true });
+
+      mainContent.addEventListener('touchend', () => {
+        if (!pulling) return;
+
+        if (pullDistance > 80 && mainContent.scrollTop === 0 && state.currentTab === 'browse') {
+          haptic('medium');
+          searchInput.value = '';
+          searchClear.classList.remove('show');
+          state.searchQuery = '';
+          renderPosts(false);
+          
+          setTimeout(() => {
+            document.getElementById('ptr').classList.remove('active');
+            showToast('Posts refreshed', 'success');
+          }, 1000);
+        } else {
+          document.getElementById('ptr').classList.remove('active');
+        }
+
+        pulling = false;
+        pullDistance = 0;
+      });
+
+      async function init() {
+        loadImageCache();
+        loadPostsCache();
+        setupBackButton();
+        initTelegramButtons();
+
+        await renderPosts();
+        loadProfile();
+        updateTelegramButtons();
+
+        try {
+          const startParam = tg?.initDataUnsafe?.start_param || new URLSearchParams(window.location.search).get('tgWebAppStartParam');
+          
+          if (startParam === 'favorites' && hasFavorites()) {
+            navigateToTab('favorites');
+          } else if (startParam === 'profile') {
+            openSettings();
+          }
+        } catch (e) {
+          console.warn('Start param error:', e);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+
+      window.addEventListener('error', (e) => {
+        console.error('Global error:', e.error);
+      });
+      
+      window.addEventListener('unhandledrejection', (e) => {
+        console.error('Unhandled rejection:', e.reason);
+      });
+
+      console.log('Paradox Movies initialized successfully');
+    })();
+  </script>
+
+</body>
+</html>
